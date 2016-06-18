@@ -10,7 +10,7 @@ var turnReady;
 
 var pcConfig = {
   'iceServers': [{
-    'url': 'stun:stun.l.goxogle.com:19302'
+    'url': 'stun:stun.l.google.com:19302'
   }]
 };
 
@@ -26,7 +26,7 @@ var sdpConstraints = {
 
 var room = 'foo';
 // Could prompt for room name:
-// room = prompt('Enter room name:');
+room = prompt('Enter room name:');
 
 var socket = io.connect();
 
@@ -54,7 +54,7 @@ socket.on('joined', function(room) {
   console.log('joined: ' + room);
   isChannelReady = true;
 });
-
+// 服务器传来log信息  就打印出来
 socket.on('log', function(array) {
   console.log.apply(console, array);
 });
@@ -96,7 +96,7 @@ var localVideo = document.querySelector('#localVideo');
 var remoteVideo = document.querySelector('#remoteVideo');
 
 navigator.mediaDevices.getUserMedia({
-  audio: true,
+  audio: false,
   video: true
 })
 .then(gotStream)
@@ -120,15 +120,7 @@ var constraints = {
 
 console.log('Getting user media with constraints', constraints);
 
-// if (location.hostname !== 'localhost') {
-//   requestTurn(
-//     'https://computeengineondemand.appspot.com/turn?username=41784574&key=4080218913'
-//   );
-// }
-
 function maybeStart() {
-
-
   console.log('>>>>>>> maybeStart() ', isStarted, localStream, isChannelReady);
   if (!isStarted && typeof localStream !== 'undefined' && isChannelReady) {
     console.log('>>>>>> creating peer connection');
@@ -209,35 +201,6 @@ function setLocalAndSendMessage(sessionDescription) {
 
 function onCreateSessionDescriptionError(error) {
   trace('Failed to create session description: ' + error.toString());
-}
-
-function requestTurn(turnURL) {
-  var turnExists = false;
-  for (var i in pcConfig.iceServers) {
-    if (pcConfig.iceServers[i].url.substr(0, 5) === 'turn:') {
-      turnExists = true;
-      turnReady = true;
-      break;
-    }
-  }
-  if (!turnExists) {
-    console.log('Getting TURN server from ', turnURL);
-    // No TURN server. Get one from computeengineondemand.appspot.com:
-    var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function() {
-      if (xhr.readyState === 4 && xhr.status === 200) {
-        var turnServer = JSON.parse(xhr.responseText);
-        console.log('Got TURN server: ', turnServer);
-        pcConfig.iceServers.push({
-          'url': 'turn:' + turnServer.username + '@' + turnServer.turn,
-          'credential': turnServer.password
-        });
-        turnReady = true;
-      }
-    };
-    xhr.open('GET', turnURL, true);
-    xhr.send();
-  }
 }
 
 function handleRemoteStreamAdded(event) {
