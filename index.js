@@ -14,17 +14,43 @@ const   options = {
 const fileServer = new(nodeStatic.Server)();
 const app = https.createServer(options,(req, res) => {
   fileServer.serve(req, res);
-}).listen(7776);
+}).listen(8081);
 
 const io = socketIO.listen(app);
 console.log("server starting...");
+
+
+
+
+
+
+
+
+
+
+var socketlist = [];
+io.sockets.on('connection', function(socket) {
+    socketlist.push(socket);
+    socket.emit('socket_is_connected','You are connected!');
+    socket.on('close', function () {
+      console.log('socket closed');
+      socketlist.splice(socketlist.indexOf(socket), 1);
+    });
+});
 
 //sockets 建立时
 io.sockets.on('connection', function(socket) {
 
 	console.log('[connection]');
-	console.log();
 
+	socketlist.push(socket);
+
+	socket.on('destroyAll', function () {
+
+      socketlist.forEach(function(socket) {
+		  socket.destroy();
+		});
+    });
 	// 收到消息后向所有连接的客户端广播 收到的消息
 	socket.on('message', function(message) {
 		console.log('[message]');
@@ -32,9 +58,16 @@ io.sockets.on('connection', function(socket) {
 		log('Client said: ', message);
 		// for a real app, would be room-only (not broadcast)
 		socket.broadcast.emit('message', message);
+		// io.sockets.in(socket.roomName).emit('message', message);
+		// console.log("message on ",socket.roomName);
 	});
 
 	socket.on('create or join', function(room) {
+
+
+// socket.roomName = room;
+
+
 
 		console.log('[create or join]');
 		log('Received request to create or join room ' + room);
@@ -54,7 +87,6 @@ io.sockets.on('connection', function(socket) {
 			// 当前socket加入房间room
 			socket.join(room);
 			socket.emit('joined', room, socket.id);
-			io.sockets.in(room).emit('ready');
 		}
 	});
 
