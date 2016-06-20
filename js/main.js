@@ -80,23 +80,23 @@ socket.on('log', function(array) {
 socket.on('message', function(message) {
   console.log('Client received message:', message);
   if (message === 'got user media') {
-    maybeStart();
-  } else if (message.type === 'offer') {
-    if (!isInitiator && !isStarted) {
       maybeStart();
-    }
-    pc.setRemoteDescription(new RTCSessionDescription(message));
-    doAnswer();
+  } else if (message.type === 'offer') {
+      if (!isInitiator && !isStarted) {
+        maybeStart();
+      }
+      pc.setRemoteDescription(new RTCSessionDescription(message));
+      doAnswer();
   } else if (message.type === 'answer' && isStarted) {
-    pc.setRemoteDescription(new RTCSessionDescription(message));
+     pc.setRemoteDescription(new RTCSessionDescription(message));
   } else if (message.type === 'candidate' && isStarted) {
-    var candidate = new RTCIceCandidate({
-      sdpMLineIndex: message.label,
-      candidate: message.candidate
-    });
-    pc.addIceCandidate(candidate);
+      var candidate = new RTCIceCandidate({
+        sdpMLineIndex: message.label,
+        candidate: message.candidate
+      });
+      pc.addIceCandidate(candidate);
   } else if (message === 'bye' && isStarted) {
-    handleRemoteHangup();
+      handleRemoteHangup();
   }
 });
 /////////////////////////////////////////////////////////
