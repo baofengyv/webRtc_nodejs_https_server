@@ -19,15 +19,6 @@ const app = https.createServer(options,(req, res) => {
 const io = socketIO.listen(app);
 console.log("server starting...");
 
-
-
-
-
-
-
-
-
-
 var socketlist = [];
 io.sockets.on('connection', function(socket) {
     socketlist.push(socket);
